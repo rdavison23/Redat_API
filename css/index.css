@@ -30,7 +30,7 @@ nav {
 
 button {
     background: linear-gradient(to right, #2980b9, #6dd5fa);
-    color: white;
+    color: rgb(225, 175, 175);
     border: none;
     padding: 12px 18px;
     font-size: 1rem;
