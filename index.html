@@ -9,12 +9,26 @@ html>
 </head>
 <body>
     <h1>Current Weather</h1>
+
+    <!-- Navigation  -->
+    <nav>
+        <button id="weather-btn">Weather</button>
+        <button id="extra-data-btn">Extra Data</button>
+    </nav>
     
-    <section id="weather">
-        <p>Temperature: <span id="temperature">Loading...</span>°F</p>
-        <p>Sunrise: <span id="sunrise">Loading...</span></p>
-        <p>Sunset: <span id="sunset">Loading...</span></p>
-    </section>
+    <main>
+        <section id="weather" aria-live="polite">
+            <p>Temperature: <span id="temperature">Loading...</span>°F</p>
+            <p>Sunrise: <span id="sunrise">Loading...</span></p>
+            <p>Sunset: <span id="sunset">Loading...</span></p>
+        </section>
+
+        <!-- Extra Data Section (Initially Hidden) -->
+        <section id="extra-data" style="display: none;">
+            <p>Humidity: <span id="humidity">Loading...</span>%</p>
+            <p>Wind Speed: <span id="wind-speed">Loading...</span> mph</p>
+        </section>
+    </main>
 
     <script src="js/index.js"></script> <!-- Links JavaScript file -->
 </body>
