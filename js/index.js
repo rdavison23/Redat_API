@@ -1,114 +1,96 @@
-// Base URL for fetching weather data
-const baseUrl =
-  'https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&daily=sunrise,sunset&hourly=temperature_2m,wind_speed_10m&current=is_day&temperature_unit=fahrenheit';
+// API URLs for separate queries
+const currentWeatherUrl = "https://api.open-meteo.com/v1/forecast?latitude=47.6062&longitude=-122.3321&current=temperature_2m,relative_humidity_2m&temperature_unit=fahrenheit";
+const forecastUrl = "https://api.open-meteo.com/v1/forecast?latitude=47.6062&longitude=-122.3321&daily=sunrise,sunset&temperature_unit=fahrenheit";
 
-// Function to fetch and update weather data
-function fetchWeatherData() {
-  fetch(baseUrl)
-    .then((response) => response.json())
-    .then((data) => {
-      console.log('API Response (Weather):', JSON.stringify(data, null, 2)); // Debugging step
+// Function to fetch and update current weather (temperature & humidity)
+function fetchCurrentWeather() {
+    fetch(currentWeatherUrl)
+        .then(response => response.json())
+        .then(data => {
+            console.log("API Response (Current Weather):", JSON.stringify(data, null, 2));
 
-      if (!data.hourly || !data.daily) {
-        console.error('Unexpected API response structure:', data);
-        return;
-      }
+            if (!data.current) {
+                console.error("Unexpected API response structure:", data);
+                return;
+            }
 
-      // Extract data safely
-      const temperature =
-        Array.isArray(data.hourly.temperature_2m) &&
-        data.hourly.temperature_2m.length > 0
-          ? data.hourly.temperature_2m[0]
-          : 'N/A';
-      const sunriseRaw =
-        Array.isArray(data.daily.sunrise) && data.daily.sunrise.length > 0
-          ? data.daily.sunrise[0]
-          : 'N/A';
-      const sunsetRaw =
-        Array.isArray(data.daily.sunset) && data.daily.sunset.length > 0
-          ? data.daily.sunset[0]
-          : 'N/A';
+            const temperature = data.current?.temperature_2m ?? "N/A";
+            const humidity = data.current?.relative_humidity_2m ?? "N/A";
 
-      // Convert timestamps to readable local time
-      const sunrise =
-        sunriseRaw !== 'N/A'
-          ? new Date(sunriseRaw).toLocaleTimeString()
-          : 'N/A';
-      const sunset =
-        sunsetRaw !== 'N/A' ? new Date(sunsetRaw).toLocaleTimeString() : 'N/A';
+            // Update HTML elements
+            updateElementText("temperature", temperature + "°F"); // FIXED extra "°F°F"
+            updateElementText("humidity", humidity + "%");
 
-      // Update HTML elements if they exist
-      updateElementText('temperature', temperature);
-      updateElementText('sunrise', sunrise);
-      updateElementText('sunset', sunset);
-
-      // Show relevant section
-      showSection('weather');
-    })
-    .catch((error) => {
-      console.error('Error fetching weather data:', error);
-    });
+            showSection("weather");
+        })
+        .catch(error => console.error("Error fetching current weather data:", error));
 }
 
-// Function to fetch and update extra data (humidity & wind speed)
-function fetchExtraData() {
-  fetch(baseUrl)
-    .then((response) => response.json())
-    .then((data) => {
-      console.log('API Response (Extra Data):', JSON.stringify(data, null, 2)); // Debugging step
+// Function to fetch and update forecast data (sunrise & sunset)
+function fetchForecast() {
+    fetch(forecastUrl)
+        .then(response => response.json())
+        .then(data => {
+            console.log("API Response (Forecast):", JSON.stringify(data, null, 2));
 
-      if (!data.hourly) {
-        console.error('Unexpected API response structure:', data);
-        return;
-      }
+            if (!data.daily) {
+                console.error("Unexpected API response structure:", data);
+                return;
+            }
 
-      // Extract additional data safely
-      const humidity =
-        Array.isArray(data.hourly.humidity_2m) &&
-        data.hourly.humidity_2m.length > 0
-          ? data.hourly.humidity_2m[0]
-          : 'N/A';
-      const windSpeed =
-        Array.isArray(data.hourly.wind_speed_10m) &&
-        data.hourly.wind_speed_10m.length > 0
-          ? data.hourly.wind_speed_10m[0]
-          : 'N/A';
+            // Debugging step 
+            console.log("Extracted Sunrise:", data.daily?.sunrise?.[0]);
+            console.log("Extracted Sunset:", data.daily?.sunset?.[0]);
 
-      // Update HTML elements if they exist
-      updateElementText('humidity', humidity);
-      updateElementText('wind-speed', windSpeed);
+            const sunriseRaw = data.daily?.sunrise?.[0] ?? "N/A";
+            const sunsetRaw = data.daily?.sunset?.[0] ?? "N/A";
 
-      // Show relevant section
-      showSection('extra-data');
-    })
-    .catch((error) => {
-      console.error('Error fetching extra data:', error);
-    });
+            // Convert timestamps to local time
+            const sunrise = sunriseRaw !== "N/A" ? new Date(sunriseRaw).toLocaleTimeString() : "N/A";
+            const sunset = sunsetRaw !== "N/A" ? new Date(sunsetRaw).toLocaleTimeString() : "N/A";
+
+            // Update HTML elements
+            updateElementText("sunrise", sunrise);
+            updateElementText("sunset", sunset);
+
+            showSection("forecast");
+        })
+        .catch(error => console.error("Error fetching forecast data:", error));
 }
 
-// Function to update an element’s text content safely
+// Function to update an element’s text content 
 function updateElementText(elementId, value) {
-  const element = document.getElementById(elementId);
-  if (element) {
-    element.textContent = value;
-  }
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.textContent = value;
+    }
 }
 
 // Function to toggle section visibility
 function showSection(sectionId) {
-  document.getElementById('weather').style.display =
-    sectionId === 'weather' ? 'block' : 'none';
-  document.getElementById('extra-data').style.display =
-    sectionId === 'extra-data' ? 'block' : 'none';
+    const weatherSection = document.getElementById("weather");
+    const forecastSection = document.getElementById("forecast");
+
+    if (weatherSection && forecastSection) {
+        weatherSection.style.display = sectionId === "weather" ? "block" : "none";
+        forecastSection.style.display = sectionId === "forecast" ? "block" : "none";
+    } else {
+        console.error("Sections not found in DOM");
+    }
 }
 
-// Attach event listeners to buttons
-document
-  .getElementById('weather-btn')
-  .addEventListener('click', fetchWeatherData);
-document
-  .getElementById('extra-data-btn')
-  .addEventListener('click', fetchExtraData);
+// Ensure buttons exist before attaching event listeners
+document.addEventListener("DOMContentLoaded", () => {
+    const weatherBtn = document.getElementById("weather-btn");
+    const forecastBtn = document.getElementById("forecast-btn");
 
-// Fetch initial weather data on page load
-fetchWeatherData();
+    if (weatherBtn && forecastBtn) {
+        weatherBtn.addEventListener("click", fetchCurrentWeather);
+        forecastBtn.addEventListener("click", fetchForecast);
+
+        // Fetch initial weather 
+        fetchCurrentWeather();
+    } else {
+        console.error("Buttons not found in DOM");
+    }
+});
