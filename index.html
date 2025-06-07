@@ -1,5 +1,4 @@
-<!DOCTYPE 
-html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,29 +7,27 @@ html>
     <link rel="stylesheet" href="css/index.css"> <!-- Links CSS file -->
 </head>
 <body>
-    <h1>Current Weather</h1>
+    <h1>Current Seattle Weather</h1>
 
     <!-- Navigation  -->
     <nav>
         <button id="weather-btn">Weather</button>
-        <button id="extra-data-btn">Extra Data</button>
+        <button id="forecast-btn">Forecast</button> <!-- FIXED: "Extra Data" → "Forecast" -->
     </nav>
     
     <main>
         <section id="weather" aria-live="polite">
             <p>Temperature: <span id="temperature">Loading...</span>°F</p>
-            <p>Sunrise: <span id="sunrise">Loading...</span></p>
-            <p>Sunset: <span id="sunset">Loading...</span></p>
+            <p>Humidity: <span id="humidity">Loading...</span>%</p> <!-- Moved from Extra Data -->
         </section>
 
-        <!-- Extra Data Section (Initially Hidden) -->
-        <section id="extra-data" style="display: none;">
-            <p>Humidity: <span id="humidity">Loading...</span>%</p>
-            <p>Wind Speed: <span id="wind-speed">Loading...</span> mph</p>
+        <!-- Forecast Section (Initially Hidden) -->
+        <section id="forecast" style="display: none;"> <!-- FIXED: Renamed from "extra-data" -->
+            <p>Sunrise: <span id="sunrise">Loading...</span></p>
+            <p>Sunset: <span id="sunset">Loading...</span></p>
         </section>
     </main>
 
     <script src="js/index.js"></script> <!-- Links JavaScript file -->
 </body>
 </html>
-
