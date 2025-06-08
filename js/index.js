@@ -2,6 +2,15 @@
 const currentWeatherUrl = "https://api.open-meteo.com/v1/forecast?latitude=47.6062&longitude=-122.3321&current=temperature_2m,relative_humidity_2m&temperature_unit=fahrenheit";
 const forecastUrl = "https://api.open-meteo.com/v1/forecast?latitude=47.6062&longitude=-122.3321&daily=sunrise,sunset&temperature_unit=fahrenheit";
 
+// Function to format temperature & humidity properly
+function formatTemperature(temp) {
+    return temp.toString().endsWith("°F") ? temp : temp + "°F";
+}
+
+function formatHumidity(humidity) {
+    return humidity.toString().endsWith("%") ? humidity : humidity + "%";
+}
+
 // Function to fetch and update current weather (temperature & humidity)
 function fetchCurrentWeather() {
     fetch(currentWeatherUrl)
@@ -11,19 +20,28 @@ function fetchCurrentWeather() {
 
             if (!data.current) {
                 console.error("Unexpected API response structure:", data);
+                alert("Could not fetch weather data - check your internet connection.");
                 return;
             }
 
-            const temperature = data.current?.temperature_2m ?? "N/A";
-            const humidity = data.current?.relative_humidity_2m ?? "N/A";
+            // Extract temperature & humidity
+            const temperatureRaw = data.current?.temperature_2m ?? "N/A";
+            const humidityRaw = data.current?.relative_humidity_2m ?? "N/A";
+
+            // Ensure units are added only if missing
+            const temperature = formatTemperature(temperatureRaw);
+            const humidity = formatHumidity(humidityRaw);
 
             // Update HTML elements
-            updateElementText("temperature", temperature + "°F"); // FIXED extra "°F°F"
-            updateElementText("humidity", humidity + "%");
+            updateElementText("temperature", temperature);
+            updateElementText("humidity", humidity);
 
             showSection("weather");
         })
-        .catch(error => console.error("Error fetching current weather data:", error));
+        .catch(error => {
+            console.error("Error fetching current weather data:", error);
+            alert("Could not fetch weather data - check your internet connection.");
+        });
 }
 
 // Function to fetch and update forecast data (sunrise & sunset)
@@ -35,13 +53,11 @@ function fetchForecast() {
 
             if (!data.daily) {
                 console.error("Unexpected API response structure:", data);
+                alert("Could not fetch forecast data - check your internet connection.");
                 return;
             }
 
-            // Debugging step 
-            console.log("Extracted Sunrise:", data.daily?.sunrise?.[0]);
-            console.log("Extracted Sunset:", data.daily?.sunset?.[0]);
-
+            // Extract sunrise & sunset times
             const sunriseRaw = data.daily?.sunrise?.[0] ?? "N/A";
             const sunsetRaw = data.daily?.sunset?.[0] ?? "N/A";
 
@@ -49,16 +65,18 @@ function fetchForecast() {
             const sunrise = sunriseRaw !== "N/A" ? new Date(sunriseRaw).toLocaleTimeString() : "N/A";
             const sunset = sunsetRaw !== "N/A" ? new Date(sunsetRaw).toLocaleTimeString() : "N/A";
 
-            // Update HTML elements
             updateElementText("sunrise", sunrise);
             updateElementText("sunset", sunset);
 
             showSection("forecast");
         })
-        .catch(error => console.error("Error fetching forecast data:", error));
+        .catch(error => {
+            console.error("Error fetching forecast data:", error);
+            alert("Could not fetch forecast data - check your internet connection.");
+        });
 }
 
-// Function to update an element’s text content 
+// Function to update an element’s text content
 function updateElementText(elementId, value) {
     const element = document.getElementById(elementId);
     if (element) {
@@ -88,7 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
         weatherBtn.addEventListener("click", fetchCurrentWeather);
         forecastBtn.addEventListener("click", fetchForecast);
 
-        // Fetch initial weather 
+        // Fetch initial weather
         fetchCurrentWeather();
     } else {
         console.error("Buttons not found in DOM");
